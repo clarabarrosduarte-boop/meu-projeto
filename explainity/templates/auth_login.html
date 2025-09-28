@@ -1,0 +1,24 @@
+﻿{% extends 'base.html' %}
+{% block title %}Explainity · Entrar{% endblock %}
+{% block content %}
+<section class="form-wrapper" aria-labelledby="login-title">
+  <h1 id="login-title">Entrar</h1>
+  <form method="post" novalidate class="form-grid">
+    {{ form.hidden_tag() }}
+    <label for="{{ form.email.id }}">Email
+      {{ form.email(size=32, autofocus=True, placeholder='seu@email.com') }}
+      {% if form.email.errors %}
+        <span class="error">{{ form.email.errors[0] }}</span>
+      {% endif %}
+    </label>
+    <label for="{{ form.password.id }}">Senha
+      {{ form.password(size=32, autocomplete='current-password') }}
+      {% if form.password.errors %}
+        <span class="error">{{ form.password.errors[0] }}</span>
+      {% endif %}
+    </label>
+    {{ form.submit(class_='btn primary') }}
+  </form>
+  <p class="muted">Ainda não tem conta? <a href="{{ url_for('register') }}">Crie agora!</a></p>
+</section>
+{% endblock %}

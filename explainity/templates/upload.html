@@ -1,0 +1,33 @@
+﻿{% extends 'base.html' %}
+{% block title %}Explainity · Enviar vídeo{% endblock %}
+{% block content %}
+<section aria-labelledby="upload-title" class="form-wrapper">
+  <h1 id="upload-title">Enviar vídeo</h1>
+  <p class="muted">Dica: vídeos entre 3 e 8 minutos seguram a atenção da galera.</p>
+  <form method="post" enctype="multipart/form-data" class="form-grid" novalidate>
+    {{ form.hidden_tag() }}
+    <label for="{{ form.title.id }}">Título
+      {{ form.title(size=48, placeholder='Ex: Trigonometria sem drama') }}
+      {% if form.title.errors %}
+        <span class="error">{{ form.title.errors[0] }}</span>
+      {% endif %}
+    </label>
+    <label for="{{ form.description.id }}">Descrição
+      {{ form.description(rows=4, cols=48, placeholder='Resuma a ideia do vídeo...') }}
+      {% if form.description.errors %}
+        <span class="error">{{ form.description.errors[0] }}</span>
+      {% endif %}
+    </label>
+    <label for="{{ form.subject.id }}">Matéria
+      {{ form.subject() }}
+    </label>
+    <label for="{{ form.level.id }}">Nível
+      {{ form.level() }}
+    </label>
+    <label class="file-label">Arquivo de vídeo (mp4, webm, mov até {{ (config.MAX_CONTENT_LENGTH // (1024*1024)) }}MB)
+      <input type="file" name="file" accept="video/mp4,video/webm,video/quicktime" required />
+    </label>
+    {{ form.submit(class_='btn primary') }}
+  </form>
+</section>
+{% endblock %}

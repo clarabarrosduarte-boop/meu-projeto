@@ -1,0 +1,50 @@
+﻿{% extends 'base.html' %}
+{% block title %}Explainity · Editar {{ video.title }}{% endblock %}
+{% block content %}
+<section class="video-editor" aria-labelledby="edit-title">
+  <h1 id="edit-title">Editar vídeo</h1>
+  <video id="editorPlayer" class="player" controls playsinline preload="metadata" src="{{ url_for('uploaded_file', filename=video.filename) }}"></video>
+
+  <form method="post" class="form-grid" novalidate data-editor>
+    {{ form.hidden_tag() }}
+    <label for="{{ form.title.id }}">Título
+      {{ form.title(size=48) }}
+      {% if form.title.errors %}
+        <span class="error">{{ form.title.errors[0] }}</span>
+      {% endif %}
+    </label>
+    <label for="{{ form.description.id }}">Descrição
+      {{ form.description(rows=4, cols=48) }}
+      {% if form.description.errors %}
+        <span class="error">{{ form.description.errors[0] }}</span>
+      {% endif %}
+    </label>
+    <label for="{{ form.subject.id }}">Matéria
+      {{ form.subject() }}
+    </label>
+    <label for="{{ form.level.id }}">Nível
+      {{ form.level() }}
+    </label>
+
+    <fieldset class="clipper">
+      <legend>Recorte rápido (sem reprocessar)</legend>
+      <div class="clip-grid">
+        <label for="{{ form.start_time.id }}">Início (segundos)
+          {{ form.start_time(step='0.1') }}
+        </label>
+        <label for="{{ form.end_time.id }}">Fim (segundos, -1 = até o fim)
+          {{ form.end_time(step='0.1') }}
+        </label>
+        <div class="clip-actions">
+          <button type="button" class="btn" data-mark="start">Marcar início</button>
+          <button type="button" class="btn" data-mark="end">Marcar fim</button>
+        </div>
+      </div>
+      <p class="muted">Salve o recorte para que o player comece e termine automaticamente.</p>
+    </fieldset>
+
+    <label class="toggle">{{ form.is_published() }} Publicado?</label>
+    {{ form.submit(class_='btn primary') }}
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,39 @@
+﻿{% extends 'base.html' %}
+{% block title %}Explainity · Descubra vídeos{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Aprenda matérias com quem fala sua língua</h1>
+  <p class="muted">Explore vídeos feitos por adolescentes para adolescentes e compartilhe com a galera.</p>
+</section>
+
+<form class="filters" method="get" aria-label="Filtrar vídeos">
+  <label for="busca">Buscar</label>
+  <input id="busca" type="search" name="q" placeholder="Buscar por título" value="{{ q }}" aria-label="Buscar vídeos" />
+
+  <label for="subject">Matéria</label>
+  <select id="subject" name="subject">
+    <option value="">Todas</option>
+    {% for s in subjects %}
+      <option value="{{ s }}" {% if subject==s %}selected{% endif %}>{{ s }}</option>
+    {% endfor %}
+  </select>
+
+  <label for="level">Nível</label>
+  <select id="level" name="level">
+    <option value="">Todos</option>
+    {% for l in levels %}
+      <option value="{{ l }}" {% if level==l %}selected{% endif %}>{{ l }}</option>
+    {% endfor %}
+  </select>
+
+  <button type="submit" class="btn">Filtrar</button>
+</form>
+
+<section class="grid" aria-live="polite">
+  {% for v in videos %}
+    {% include '_video_card.html' %}
+  {% else %}
+    <p class="muted">Nenhum vídeo encontrado. Que tal enviar o primeiro?</p>
+  {% endfor %}
+</section>
+{% endblock %}

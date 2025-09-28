@@ -1,0 +1,12 @@
+﻿<article class="card" aria-label="{{ v.title }}">
+  <div class="card-body">
+    <h3 class="card-title"><a href="{{ url_for('video_detail', video_id=v.id) }}">{{ v.title }}</a></h3>
+    <p class="muted">{{ v.subject }} · {{ v.level }}</p>
+    {% if v.description %}
+      <p>{{ v.description[:160] }}{% if v.description|length > 160 %}...{% endif %}</p>
+    {% else %}
+      <p class="muted">Sem descrição ainda. Bora descobrir juntos!</p>
+    {% endif %}
+    <a class="btn" href="{{ url_for('video_detail', video_id=v.id) }}">Assistir</a>
+  </div>
+</article>

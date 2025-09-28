@@ -1,0 +1,36 @@
+﻿{% extends 'base.html' %}
+{% block title %}Explainity · Criar conta{% endblock %}
+{% block content %}
+<section class="form-wrapper" aria-labelledby="register-title">
+  <h1 id="register-title">Criar conta</h1>
+  <form method="post" novalidate class="form-grid">
+    {{ form.hidden_tag() }}
+    <label for="{{ form.name.id }}">Nome
+      {{ form.name(size=32, autofocus=True, placeholder='Seu nome') }}
+      {% if form.name.errors %}
+        <span class="error">{{ form.name.errors[0] }}</span>
+      {% endif %}
+    </label>
+    <label for="{{ form.email.id }}">Email
+      {{ form.email(size=32, placeholder='seu@email.com') }}
+      {% if form.email.errors %}
+        <span class="error">{{ form.email.errors[0] }}</span>
+      {% endif %}
+    </label>
+    <label for="{{ form.password.id }}">Senha
+      {{ form.password(size=32, autocomplete='new-password') }}
+      {% if form.password.errors %}
+        <span class="error">{{ form.password.errors[0] }}</span>
+      {% endif %}
+    </label>
+    <label for="{{ form.confirm.id }}">Confirmar senha
+      {{ form.confirm(size=32, autocomplete='new-password') }}
+      {% if form.confirm.errors %}
+        <span class="error">{{ form.confirm.errors[0] }}</span>
+      {% endif %}
+    </label>
+    {{ form.submit(class_='btn primary') }}
+  </form>
+  <p class="muted">Já tem conta? <a href="{{ url_for('login') }}">Entre aqui.</a></p>
+</section>
+{% endblock %}

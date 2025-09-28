@@ -1,0 +1,19 @@
+﻿{% extends 'base.html' %}
+{% block title %}Explainity · {{ video.title }}{% endblock %}
+{% block content %}
+<article class="video-detail" data-video-id="{{ video.id }}">
+  <header>
+    <h1>{{ video.title }}</h1>
+    <p class="muted">{{ video.subject }} · {{ video.level }}</p>
+  </header>
+  <video id="player" class="player" controls playsinline preload="metadata" src="{{ url_for('uploaded_file', filename=video.filename) }}"></video>
+  <p>{{ video.description or 'Sem descrição por enquanto. Conta pra gente o que achou nos comentários (em breve)!' }}</p>
+
+  <div class="actions">
+    <button class="btn-outline" data-share data-share-url="{{ url_for('video_detail', video_id=video.id, _external=True) }}">Ajude um amigo (copiar link)</button>
+    {% if current_user.is_authenticated and current_user.id == video.owner_id %}
+      <a class="btn" href="{{ url_for('video_edit', video_id=video.id) }}">Editar</a>
+    {% endif %}
+  </div>
+</article>
+{% endblock %}

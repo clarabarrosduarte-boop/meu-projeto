@@ -1,0 +1,9 @@
+﻿{% extends 'base.html' %}
+{% block title %}Explainity · {{ code }}{% endblock %}
+{% block content %}
+<section class="error-page" role="alert" aria-live="assertive">
+  <h1>Erro {{ code }}</h1>
+  <p>{{ message }}</p>
+  <p><a class="btn" href="{{ url_for('index') }}">Voltar para a página inicial</a></p>
+</section>
+{% endblock %}
