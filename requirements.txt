@@ -1,7 +1,11 @@
 ﻿Flask
 Flask-Login
 Flask-WTF
-Flask-SQLAlchemy
-email-validator
-Flask-Bcrypt
+WTForms
+SQLAlchemy
+boto3
 gunicorn
+email-validator
+python-dotenv
+Flask-Mail
+Flask-Bcrypt

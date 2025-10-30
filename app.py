@@ -7,6 +7,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Iterable
 
+from dotenv import load_dotenv
+
 from flask import (
     Flask,
     abort,
@@ -41,6 +43,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
 from config import Config
+
+load_dotenv()
 
 # --- App setup --------------------------------------------------------------
 app = Flask(__name__)
@@ -428,3 +432,67 @@ def init_db_command() -> None:
 
 if __name__ == "__main__":
     app.run(debug=True)
+import os, uuid
+from flask import request, jsonify
+import boto3
+from botocore.config import Config
+from werkzeug.utils import secure_filename
+
+S3_ENDPOINT_URL = os.environ["S3_ENDPOINT_URL"]
+S3_KEY = os.environ["S3_KEY"]
+S3_SECRET = os.environ["S3_SECRET"]
+S3_BUCKET = os.environ["S3_BUCKET_NAME"]
+
+_s3 = boto3.client(
+    "s3",
+    endpoint_url=S3_ENDPOINT_URL,
+    aws_access_key_id=S3_KEY,
+    aws_secret_access_key=S3_SECRET,
+    region_name="auto",
+    config=Config(signature_version="s3v4"),
+)
+
+@app.post("/api/upload/init")
+def upload_init():
+    data = request.get_json()
+    filename = secure_filename(data["filename"])
+    content_type = data.get("contentType", "application/octet-stream")
+    key = f"uploads/{uuid.uuid4()}_{filename}"
+
+    resp = _s3.create_multipart_upload(Bucket=S3_BUCKET, Key=key, ContentType=content_type)
+    return jsonify({"key": key, "uploadId": resp["UploadId"]})
+
+@app.post("/api/upload/parts")
+def upload_parts():
+    data = request.get_json()
+    key = data["key"]
+    upload_id = data["uploadId"]
+    part_numbers = data["parts"]  # ex.: [1,2,3,4...]
+
+    urls = []
+    for p in part_numbers:
+        url = _s3.generate_presigned_url(
+            "upload_part",
+            Params={"Bucket": S3_BUCKET, "Key": key, "UploadId": upload_id, "PartNumber": p},
+            ExpiresIn=3600,
+        )
+        urls.append({"partNumber": p, "url": url})
+    return jsonify({"urls": urls})
+
+@app.post("/api/upload/complete")
+def upload_complete():
+    data = request.get_json()
+    key = data["key"]
+    upload_id = data["uploadId"]
+    parts = data["parts"]  # [{partNumber:1, etag:"..."}, ...]
+
+    completed = {"Parts": [{"ETag": p["etag"], "PartNumber": p["partNumber"]} for p in parts]}
+    _s3.complete_multipart_upload(
+        Bucket=S3_BUCKET, Key=key, UploadId=upload_id, MultipartUpload=completed
+    )
+
+    # Se seu bucket for público em R2.dev, pode construir a URL pública aqui
+    public_base = os.environ.get("R2_PUBLIC_BASE")  # opcional
+    url = f"{public_base}/{key}" if public_base else None
+
+    return jsonify({"ok": True, "key": key, "url": url})

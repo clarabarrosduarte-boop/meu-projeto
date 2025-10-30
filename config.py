@@ -13,7 +13,7 @@ class Config:
         f"sqlite:///{(INSTANCE_PATH / 'explainity.sqlite').as_posix()}"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    MAX_CONTENT_LENGTH = int(os.environ.get("MAX_CONTENT_LENGTH_MB", 200)) * 1024 * 1024
+    MAX_CONTENT_LENGTH = int(os.environ.get("MAX_CONTENT_LENGTH_MB", 4096)) * 1024 * 1024
     UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", str(UPLOAD_PATH))
     ALLOWED_EXTENSIONS = {"mp4", "webm", "mov"}
     REMEMBER_COOKIE_DURATION = timedelta(days=14)
