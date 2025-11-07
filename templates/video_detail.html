@@ -16,6 +16,12 @@
     <button class="btn-outline" data-share data-share-url="{{ url_for('video_detail', video_id=video.id, _external=True) }}">Ajude um amigo (copiar link)</button>
     {% if current_user.is_authenticated and current_user.id == video.owner_id %}
       <a class="btn" href="{{ url_for('video_edit', video_id=video.id) }}">Editar</a>
+      {% if delete_form %}
+        <form method="post" action="{{ url_for('video_delete', video_id=video.id) }}" onsubmit="return confirm('Tem certeza que deseja remover este vídeo?');">
+          {{ delete_form.hidden_tag() }}
+          {{ delete_form.submit(class_='btn danger') }}
+        </form>
+      {% endif %}
     {% endif %}
   </div>
 </article>

@@ -47,7 +47,15 @@
     </fieldset>
 
     <label class="toggle">{{ form.is_published() }} Publicado?</label>
-    {{ form.submit(class_='btn primary') }}
+    <div class="actions">
+      {{ form.submit(class_='btn primary') }}
+    </div>
   </form>
+  {% if delete_form %}
+    <form method="post" action="{{ url_for('video_delete', video_id=video.id) }}" class="actions" onsubmit="return confirm('Tem certeza que deseja remover este vídeo?');">
+      {{ delete_form.hidden_tag() }}
+      {{ delete_form.submit(class_='btn danger') }}
+    </form>
+  {% endif %}
 </section>
 {% endblock %}

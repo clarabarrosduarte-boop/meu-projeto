@@ -4,11 +4,11 @@ Explainity é uma plataforma web onde estudantes encontram e compartilham vídeo
 
 ## Features
 - Cadastro, login e sessão lembrada (Flask-Login).
-- Upload seguro de vídeos (auto-normalizados para MP4 H.264) de até 5 GB por padrão, parametrizável via `MAX_CONTENT_LENGTH_MB`.
+- Upload seguro de vídeos (auto-normalizados para MP4 H.264 apenas quando necessário) de até 5 GB por padrão, parametrizável via `MAX_CONTENT_LENGTH_MB`.
 - Criação de recortes (start/end) sem reprocessar o arquivo; o player respeita os recortes via JavaScript.
 - Página inicial com filtros por matéria, nível e busca textual (ilike).
 - Interface responsiva e acessível (HTML5, CSS custom, WAI-ARIA).
-- Rate-limiting simples para proteger rotas POST.
+- Rate-limiting simples e exclusão segura de vídeos publicados.
 - CLI `flask --app app init-db` para bootstrap do banco.
 - Testes de fumaça com pytest (`tests/test_routes.py`).
 
@@ -52,7 +52,7 @@ explainity/
 1. Ajuste `SECRET_KEY`, `DATABASE_URI` e `UPLOAD_FOLDER` em variáveis de ambiente.
 2. Rode `flask --app app init-db` no target.
 3. Use um servidor WSGI (Gunicorn ou Waitress) atrás de Nginx/Apache.
-4. Configure HTTPS e um storage externo para vídeos em produção.
+4. Configure HTTPS e um storage externo para vídeos em produção (veja variáveis `S3_*`, `FORCE_TRANSCODE_MP4`, `FFMPEG_*`).
 
 ## Tests
 ```powershell

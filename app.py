@@ -53,6 +53,7 @@ from werkzeug.utils import secure_filename
 from config import Config
 
 load_dotenv()
+mimetypes.add_type("video/mp4", ".m4v")
 
 # --- App setup --------------------------------------------------------------
 app = Flask(__name__)
@@ -183,6 +184,10 @@ class EditVideoForm(FlaskForm):
     submit = SubmitField("Salvar alterações")
 
 
+class DeleteVideoForm(FlaskForm):
+    submit = SubmitField("Excluir vídeo")
+
+
 
 
 @app.context_processor
@@ -195,6 +200,7 @@ def inject_globals():
 
 # --- Helpers ---------------------------------------------------------------
 _rate_buckets: defaultdict[str, deque[float]] = defaultdict(deque)
+_direct_playable_exts = {".mp4", ".m4v"}
 
 
 @lru_cache(maxsize=1)
@@ -206,21 +212,29 @@ def _ffmpeg_path() -> str | None:
         return None
 
 
+def _should_transcode(source_path: Path) -> bool:
+    ext = source_path.suffix.lower()
+    force = os.environ.get("FORCE_TRANSCODE_MP4", "0") == "1"
+    if ext in _direct_playable_exts and not force:
+        return False
+    return True
+
+
 def _standardize_video(source_path: Path, token: str) -> tuple[Path, str]:
     """Ensure the uploaded video is a browser-friendly MP4 (H.264 + AAC)."""
     final_filename = f"{token}.mp4"
     final_path = source_path.parent / final_filename
     ffmpeg_bin = _ffmpeg_path()
 
-    if ffmpeg_bin is None and source_path.suffix.lower() != ".mp4":
-        raise RuntimeError(
-            "Precisamos converter este formato para MP4, mas o FFmpeg não está instalado. "
-            "Instale o FFmpeg ou envie um arquivo já em MP4."
-        )
-
-    if ffmpeg_bin is None:
+    if not _should_transcode(source_path):
         source_path.rename(final_path)
         return final_path, "video/mp4"
+
+    if ffmpeg_bin is None:
+        raise RuntimeError(
+            "Precisamos converter este formato para MP4, mas o FFmpeg não está instalado. "
+            "Instale o FFmpeg (ou defina FORCE_TRANSCODE_MP4=0) e tente novamente."
+        )
 
     temp_path = source_path.parent / f"{token}_processing.mp4"
     cmd = [
@@ -231,9 +245,9 @@ def _standardize_video(source_path: Path, token: str) -> tuple[Path, str]:
         "-c:v",
         os.environ.get("FFMPEG_VIDEO_CODEC", "libx264"),
         "-preset",
-        os.environ.get("FFMPEG_PRESET", "medium"),
+        os.environ.get("FFMPEG_PRESET", "veryfast"),
         "-crf",
-        os.environ.get("FFMPEG_CRF", "22"),
+        os.environ.get("FFMPEG_CRF", "24"),
         "-pix_fmt",
         "yuv420p",
         "-profile:v",
@@ -243,7 +257,7 @@ def _standardize_video(source_path: Path, token: str) -> tuple[Path, str]:
         "-c:a",
         "aac",
         "-b:a",
-        os.environ.get("FFMPEG_AUDIO_BITRATE", "192k"),
+        os.environ.get("FFMPEG_AUDIO_BITRATE", "160k"),
         str(temp_path),
     ]
     app.logger.info("Executando FFmpeg para normalizar vídeo: %s", " ".join(cmd))
@@ -449,7 +463,8 @@ def video_detail(video_id: int):
         if not video.is_published and (not current_user.is_authenticated or video.owner_id != current_user.id):
             abort(403)
     mime_type = mimetypes.guess_type(video.filename)[0] or "video/mp4"
-    return render_template("video_detail.html", video=video, video_mime=mime_type)
+    delete_form = DeleteVideoForm() if current_user.is_authenticated and current_user.id == video.owner_id else None
+    return render_template("video_detail.html", video=video, video_mime=mime_type, delete_form=delete_form)
 
 
 @app.route("/videos/<int:video_id>/edit", methods=["GET", "POST"])
@@ -462,6 +477,7 @@ def video_edit(video_id: int):
         if video.owner_id != current_user.id:
             abort(403)
         form = EditVideoForm(obj=video)
+        delete_form = DeleteVideoForm()
         mime_type = mimetypes.guess_type(video.filename)[0] or "video/mp4"
         if form.validate_on_submit():
             start = form.start_time.data if form.start_time.data is not None else 0.0
@@ -480,7 +496,27 @@ def video_edit(video_id: int):
             db.commit()
             flash("Vídeo atualizado.", "success")
             return redirect(url_for("video_detail", video_id=video.id))
-    return render_template("video_edit.html", form=form, video=video, video_mime=mime_type)
+    return render_template("video_edit.html", form=form, video=video, video_mime=mime_type, delete_form=delete_form)
+
+
+@app.route("/videos/<int:video_id>/delete", methods=["POST"])
+@login_required
+def video_delete(video_id: int):
+    form = DeleteVideoForm()
+    if not form.validate_on_submit():
+        abort(400)
+    with SessionLocal() as db:
+        video = db.get(Video, video_id)
+        if not video:
+            abort(404)
+        if video.owner_id != current_user.id:
+            abort(403)
+        file_path = Path(app.config["UPLOAD_FOLDER"]) / video.filename
+        file_path.unlink(missing_ok=True)
+        db.delete(video)
+        db.commit()
+    flash("Vídeo removido permanentemente.", "info")
+    return redirect(url_for("index"))
 
 
 
