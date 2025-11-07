@@ -4,7 +4,7 @@ Explainity é uma plataforma web onde estudantes encontram e compartilham vídeo
 
 ## Features
 - Cadastro, login e sessão lembrada (Flask-Login).
-- Upload seguro de vídeos `.mp4`, `.webm`, `.mov` (até 4 GB por padrão, parametrizável via `MAX_CONTENT_LENGTH_MB`).
+- Upload seguro de vídeos (auto-normalizados para MP4 H.264) de até 5 GB por padrão, parametrizável via `MAX_CONTENT_LENGTH_MB`.
 - Criação de recortes (start/end) sem reprocessar o arquivo; o player respeita os recortes via JavaScript.
 - Página inicial com filtros por matéria, nível e busca textual (ilike).
 - Interface responsiva e acessível (HTML5, CSS custom, WAI-ARIA).

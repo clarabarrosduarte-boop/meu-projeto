@@ -3,7 +3,10 @@
 {% block content %}
 <section class="video-editor" aria-labelledby="edit-title">
   <h1 id="edit-title">Editar vídeo</h1>
-  <video id="editorPlayer" class="player" controls playsinline preload="metadata" src="{{ url_for('uploaded_file', filename=video.filename) }}"></video>
+  <video id="editorPlayer" class="player" controls playsinline preload="metadata">
+    <source src="{{ url_for('uploaded_file', filename=video.filename) }}" type="{{ video_mime }}">
+    Seu navegador não suporta vídeos HTML5.
+  </video>
 
   <form method="post" class="form-grid" novalidate data-editor>
     {{ form.hidden_tag() }}

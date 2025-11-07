@@ -24,8 +24,8 @@
     <label for="{{ form.level.id }}">Nível
       {{ form.level() }}
     </label>
-    <label class="file-label">Arquivo de vídeo (mp4, webm, mov até {{ (config.MAX_CONTENT_LENGTH // (1024*1024)) }}MB)
-      <input type="file" name="file" accept="video/mp4,video/webm,video/quicktime" required />
+    <label class="file-label">Arquivo de vídeo (mp4, mov, webm, mkv, avi ou m4v até {{ (config.MAX_CONTENT_LENGTH // (1024*1024)) }}MB)
+      <input type="file" name="file" accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/x-msvideo,video/x-m4v" required />
     </label>
     {{ form.submit(class_='btn primary') }}
   </form>

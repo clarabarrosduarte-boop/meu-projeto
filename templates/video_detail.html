@@ -6,7 +6,10 @@
     <h1>{{ video.title }}</h1>
     <p class="muted">{{ video.subject }} · {{ video.level }}</p>
   </header>
-  <video id="player" class="player" controls playsinline preload="metadata" src="{{ url_for('uploaded_file', filename=video.filename) }}"></video>
+  <video id="player" class="player" controls playsinline preload="metadata">
+    <source src="{{ url_for('uploaded_file', filename=video.filename) }}" type="{{ video_mime }}">
+    Seu navegador não suporta vídeos HTML5.
+  </video>
   <p>{{ video.description or 'Sem descrição por enquanto. Conta pra gente o que achou nos comentários (em breve)!' }}</p>
 
   <div class="actions">

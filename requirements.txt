@@ -9,3 +9,4 @@ email-validator
 python-dotenv
 Flask-Mail
 Flask-Bcrypt
+imageio-ffmpeg
