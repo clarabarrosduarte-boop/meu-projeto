@@ -24,3 +24,4 @@ env/
 # Test / cache
 .pytest_cache/
 .mypy_cache/
+explainity.sqlite
